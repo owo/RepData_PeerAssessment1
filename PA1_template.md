@@ -4,13 +4,15 @@
 ## Loading and preprocessing the data
 First, we import all the packages we will be needing. Here we will only need to
 import the `ggplot2` package for drawing all our plots.
-```{r import_libs, echo=TRUE}
+
+```r
 library(ggplot2);
 ```
 
 Now, we load the activity data and convert values in the "date" column to 
 *Date* objects for convenient manipulation and plotting.
-```{r read_data, echo=TRUE}
+
+```r
 data <- read.csv('activity.csv');
 data[,"date"] <- as.Date(data[,"date"], "%Y-%m-%d");
 ```
@@ -22,7 +24,8 @@ ignoring missing values).
 Then, we plot a histogram of the total number of steps taken each day using the
 computed data.
 
-```{r sum_steps, echo=TRUE}
+
+```r
 # Get unique dates
 dates <- unique(data[,'date']);
 
@@ -35,7 +38,8 @@ for (d in 0:length(dates)) {
 ```
 
 We now plot the histogram of the total number of steps taken each day.
-```{r daily_steps_hist, echo=TRUE}
+
+```r
 qplot(dates, steps,
       geom="histogram",
       stat="identity",
@@ -43,20 +47,28 @@ qplot(dates, steps,
       ylab="Steps");
 ```
 
+![plot of chunk daily_steps_hist](figure/daily_steps_hist.png) 
+
 Additionally, we can compute the mean and median total number of steps taken per
 day using the previously computed data. Specifically, will use the `summary`
 function to do so.
-```{r, mean_and_median, echo=TRUE}
+
+```r
 s <- summary(steps);
 cat(c("Mean =", as.character(s['Mean'])), "   ",
     c("Median =", as.character(s['Median'])));
+```
+
+```
+## Mean = 9350     Median = 10400
 ```
 
 ## What is the average daily activity pattern?
 
 Here we make a time series plot of the 5-minute interval and the average number
 of steps taken, averaged across all days.
-```{r average_daily, echo=TRUE}
+
+```r
 # Get unique intervals
 intervals <- unique(data[,'interval']);
 
@@ -75,9 +87,12 @@ qplot(intervals, avg_daily_int_steps,
       ylab="Average number of steps");
 ```
 
+![plot of chunk average_daily](figure/average_daily.png) 
+
 We can find the index of the interval containing the maximum number of steps
 on average by using the `which.max` function.
-```{r find_max_step_interval, echo=TRUE}
+
+```r
 max_ndx <- which.max(avg_daily_int_steps);
 cat("Maximum number of steps on average occurs at 5-min interval starting at ",
     as.character(intervals[max_ndx]),
@@ -86,21 +101,32 @@ cat("Maximum number of steps on average occurs at 5-min interval starting at ",
     '.', sep="");
 ```
 
+```
+## Maximum number of steps on average occurs at 5-min interval starting at 835
+## with an average number of steps equal to 206.169811320755.
+```
+
 This result is consistant with the previous plot.
 
 ## Imputing missing values
 
 We first compute the number of missing values in the data.
-```{r num_missing, echo=TRUE}
+
+```r
 missing_data <- is.na(data[,'steps']);
 num_missing <- sum(missing_data);
 cat("Number of missing values is ", as.character(num_missing), ".", sep="");
 ```
 
+```
+## Number of missing values is 2304.
+```
+
 The strategy we chose to fill in the missing values is to use, for each missing
 value, the mean value of steps for their respective 5-minute intervals. We use
 these values to create a new data set called `data_fixed`.
-```{r compute_missing, echo=TRUE}
+
+```r
 # Create a copy of the data
 data_fixed <- data[,];
 
@@ -114,7 +140,8 @@ for (i in 1:length(intervals)) {
 
 We now plot the histogram of the total number of steps taken each day for this
 new data set.
-```{r daily_steps_hist_fixed, echo=TRUE}
+
+```r
 steps_fixed <- rep(0, length(dates));
 for (d in 0:length(dates)) {
     filter <- data_fixed[,'date'] == dates[d];
@@ -128,12 +155,19 @@ qplot(dates, steps_fixed,
       ylab="Steps");
 ```
 
+![plot of chunk daily_steps_hist_fixed](figure/daily_steps_hist_fixed.png) 
+
 We also compute the mean and median total number of steps taken per
 day using the new data.
-```{r, mean_and_median_fixed, echo=TRUE}
+
+```r
 s <- summary(steps_fixed);
 cat(c("Mean =", as.character(s['Mean'])), "   ",
     c("Median =", as.character(s['Median'])));
+```
+
+```
+## Mean = 10800     Median = 10800
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -142,7 +176,8 @@ and weekends. First, we need to split the data into the two groups. We will
 just create a vector of factors identifying each data point as either 'Weekend'
 or 'Weekday'. It is assumed that Saturday and Sundays are weekends and all
 other days are weekends.
-```{r, echo=TRUE}
+
+```r
 day_of_week <- weekdays(data_fixed[,'date']);
 day_type <- sapply(day_of_week,
                    function(x){
@@ -156,7 +191,8 @@ day_type <- sapply(day_of_week,
 We now make a panel plot containing a time series plot of the 5-minute interval
 and the average number of steps taken, averaged across all weekday days or
 weekend days.
-```{r average_weekdays, echo=TRUE}
+
+```r
 # Compute new average daily steps for each interval for both weekdays and
 # weekends.
 avg_daily_int_steps_weekend <- rep(0, length(intervals));
@@ -194,3 +230,5 @@ qplot(interval, avg_daily_steps,
       xlab="Interval",
       ylab="Average number of steps");
 ```
+
+![plot of chunk average_weekdays](figure/average_weekdays.png) 
